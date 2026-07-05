@@ -1,5 +1,57 @@
 @import "tailwindcss";
 
+@layer base {
+  h1 {
+    @apply text-4xl font-bold text-gray-900;
+  }
+
+  h2 {
+    @apply text-3xl font-semibold text-gray-900;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold text-gray-800;
+  }
+
+  h4 {
+    @apply text-xl font-semibold text-gray-800;
+  }
+
+  h5 {
+    @apply text-lg font-medium text-gray-700;
+  }
+
+  h6 {
+    @apply text-base font-medium text-gray-700;
+  }
+
+  p, span, td, tr {
+    @apply text-gray-600 leading-7;
+  }
+
+  a {
+    @apply text-blue-600 hover:text-blue-700;
+  }
+   input,
+  textarea,
+  select {
+    @apply text-slate-900;
+  }
+
+  /* Placeholder */
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-slate-400;
+  }
+
+  /* Focus */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    @apply outline-none ring-2 ring-blue-500 border-blue-500;
+  }
+
+}
 :root {
   --background: #ffffff;
   --foreground: #171717;
