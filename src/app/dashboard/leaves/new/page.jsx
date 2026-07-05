@@ -3,18 +3,18 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function NewAttendancePage() {
+export default function NewLeavePage() {
   const router = useRouter();
 
   const [employees, setEmployees] = useState([]);
 
   const [formData, setFormData] = useState({
     employee: "",
-    date: "",
-    checkIn: "",
-    checkOut: "",
-    status: "Present",
-    remarks: "",
+    leaveType: "Casual Leave",
+    startDate: "",
+    endDate: "",
+    reason: "",
+    status: "Pending",
   });
 
   useEffect(() => {
@@ -22,14 +22,10 @@ export default function NewAttendancePage() {
   }, []);
 
   async function fetchEmployees() {
-    try {
-      const response = await fetch("/api/employees");
-      const result = await response.json();
+    const response = await fetch("/api/employees");
+    const result = await response.json();
 
-      setEmployees(result.data || []);
-    } catch (error) {
-      console.error(error);
-    }
+    setEmployees(result.data || []);
   }
 
   function handleChange(e) {
@@ -42,39 +38,37 @@ export default function NewAttendancePage() {
   async function handleSubmit(e) {
     e.preventDefault();
 
-    try {
-      const response = await fetch("/api/attendance", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+    const response = await fetch("/api/leaves", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
 
-      const result = await response.json();
+    const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.message);
-      }
-
-      alert("Attendance marked successfully");
-
-      router.push("/dashboard/attendance");
-    } catch (error) {
-      alert(error.message);
+    if (!response.ok) {
+      return alert(result.message);
     }
+
+    alert("Leave created successfully");
+
+    router.push("/dashboard/leaves");
   }
 
   return (
-    <div className="rounded-xl bg-white p-8 shadow max-w-3xl">
+    <div className="rounded-xl bg-white p-8 shadow">
+
       <h1 className="mb-6 text-3xl font-bold">
-        Mark Attendance
+        Apply Leave
       </h1>
 
       <form
         onSubmit={handleSubmit}
         className="space-y-5"
       >
+
         <select
           name="employee"
           value={formData.employee}
@@ -82,74 +76,74 @@ export default function NewAttendancePage() {
           className="w-full rounded border p-3"
           required
         >
+
           <option value="">
             Select Employee
           </option>
 
           {employees.map((employee) => (
+
             <option
               key={employee._id}
               value={employee._id}
             >
               {employee.firstName} {employee.lastName}
             </option>
+
           ))}
+
+        </select>
+
+        <select
+          name="leaveType"
+          value={formData.leaveType}
+          onChange={handleChange}
+          className="w-full rounded border p-3"
+        >
+
+          <option>Casual Leave</option>
+          <option>Sick Leave</option>
+          <option>Paid Leave</option>
+          <option>Unpaid Leave</option>
+
         </select>
 
         <input
           type="date"
-          name="date"
-          value={formData.date}
+          name="startDate"
+          value={formData.startDate}
           onChange={handleChange}
           className="w-full rounded border p-3"
           required
         />
 
         <input
-          type="time"
-          name="checkIn"
-          value={formData.checkIn}
+          type="date"
+          name="endDate"
+          value={formData.endDate}
           onChange={handleChange}
           className="w-full rounded border p-3"
           required
         />
-
-        <input
-          type="time"
-          name="checkOut"
-          value={formData.checkOut}
-          onChange={handleChange}
-          className="w-full rounded border p-3"
-          required
-        />
-
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="w-full rounded border p-3"
-        >
-          <option>Present</option>
-          <option>Absent</option>
-          <option>Late</option>
-          <option>Half Day</option>
-        </select>
 
         <textarea
-          rows={4}
-          name="remarks"
-          value={formData.remarks}
+          rows={5}
+          name="reason"
+          value={formData.reason}
           onChange={handleChange}
-          placeholder="Remarks"
+          placeholder="Reason"
           className="w-full rounded border p-3"
+          required
         />
 
         <button
-          className="w-full rounded bg-blue-600 p-3 text-white hover:bg-blue-700"
+          className="w-full rounded bg-blue-600 p-3 text-white"
         >
-          Save Attendance
+          Submit Leave
         </button>
+
       </form>
+
     </div>
   );
 }

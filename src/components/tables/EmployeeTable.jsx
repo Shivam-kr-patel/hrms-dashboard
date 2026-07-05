@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
@@ -43,7 +44,6 @@ export default function EmployeeTable() {
       }
 
       alert(result.message);
-
       fetchEmployees();
     } catch (error) {
       console.error(error);
@@ -91,17 +91,11 @@ export default function EmployeeTable() {
                 </div>
               </td>
 
-              <td className="px-6 py-4">
-                {employee.department}
-              </td>
+              <td className="px-6 py-4">{employee.department}</td>
 
-              <td className="px-6 py-4">
-                {employee.designation}
-              </td>
+              <td className="px-6 py-4">{employee.designation}</td>
 
-              <td className="px-6 py-4">
-                {employee.email}
-              </td>
+              <td className="px-6 py-4">{employee.email}</td>
 
               <td className="px-6 py-4">
                 <span className="rounded-full bg-green-100 px-3 py-1 text-xs text-green-700">
@@ -111,21 +105,27 @@ export default function EmployeeTable() {
 
               <td className="px-6 py-4">
                 <div className="flex justify-center gap-4">
-                  <Eye
-                    size={18}
-                    className="cursor-pointer text-gray-600"
-                  />
 
-                  <Pencil
-                    size={18}
-                    className="cursor-pointer text-blue-600"
-                  />
+                  <Link href={`/dashboard/employees/${employee._id}`}>
+                    <Eye
+                      size={18}
+                      className="cursor-pointer text-gray-600 hover:text-black"
+                    />
+                  </Link>
+
+                  <Link href={`/dashboard/employees/${employee._id}/edit`}>
+                    <Pencil
+                      size={18}
+                      className="cursor-pointer text-blue-600 hover:text-blue-800"
+                    />
+                  </Link>
 
                   <Trash2
                     size={18}
-                    className="cursor-pointer text-red-600"
+                    className="cursor-pointer text-red-600 hover:text-red-800"
                     onClick={() => deleteEmployee(employee._id)}
                   />
+
                 </div>
               </td>
             </tr>

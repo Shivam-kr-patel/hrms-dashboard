@@ -1,27 +1,30 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
-import Employee from "@/models/Employee";
+import Attendance from "@/models/Attendance";
 
-// GET Employee by ID
 export async function GET(request, { params }) {
   try {
     await connectDB();
 
-    const employee = await Employee.findById(params.id);
+    const attendance = await Attendance.findById(
+      params.id
+    ).populate("employee");
 
-    if (!employee) {
+    if (!attendance) {
       return NextResponse.json(
         {
           success: false,
-          message: "Employee not found",
+          message: "Attendance not found",
         },
-        { status: 404 }
+        {
+          status: 404,
+        }
       );
     }
 
     return NextResponse.json({
       success: true,
-      data: employee,
+      data: attendance,
     });
   } catch (error) {
     return NextResponse.json(
@@ -29,41 +32,46 @@ export async function GET(request, { params }) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
 
-// UPDATE Employee
 export async function PUT(request, { params }) {
   try {
     await connectDB();
 
     const body = await request.json();
 
-    const employee = await Employee.findByIdAndUpdate(
-      params.id,
-      body,
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const attendance =
+      await Attendance.findByIdAndUpdate(
+        params.id,
+        body,
+        {
+          new: true,
+          runValidators: true,
+        }
+      );
 
-    if (!employee) {
+    if (!attendance) {
       return NextResponse.json(
         {
           success: false,
-          message: "Employee not found",
+          message: "Attendance not found",
         },
-        { status: 404 }
+        {
+          status: 404,
+        }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Employee updated successfully",
-      data: employee,
+      message:
+        "Attendance updated successfully",
+      data: attendance,
     });
   } catch (error) {
     return NextResponse.json(
@@ -71,31 +79,38 @@ export async function PUT(request, { params }) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
 
-// DELETE Employee
 export async function DELETE(request, { params }) {
   try {
     await connectDB();
 
-    const employee = await Employee.findByIdAndDelete(params.id);
+    const attendance =
+      await Attendance.findByIdAndDelete(
+        params.id
+      );
 
-    if (!employee) {
+    if (!attendance) {
       return NextResponse.json(
         {
           success: false,
-          message: "Employee not found",
+          message: "Attendance not found",
         },
-        { status: 404 }
+        {
+          status: 404,
+        }
       );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Employee deleted successfully",
+      message:
+        "Attendance deleted successfully",
     });
   } catch (error) {
     return NextResponse.json(
@@ -103,7 +118,9 @@ export async function DELETE(request, { params }) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

@@ -1,22 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter, useParams } from "next/navigation";
 
 export default function EditEmployeePage() {
-  const { id } = useParams();
   const router = useRouter();
+  const { id } = useParams();
 
   const [loading, setLoading] = useState(true);
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm();
+  const [formData, setFormData] = useState({
+    employeeId: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    department: "",
+    designation: "",
+    joiningDate: "",
+    salary: "",
+    status: "Active",
+  });
 
   useEffect(() => {
     fetchEmployee();
@@ -27,27 +31,47 @@ export default function EditEmployeePage() {
       const response = await fetch(`/api/employees/${id}`);
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.message);
+      if (!result.success) {
+        alert(result.message);
+        return;
       }
 
-      reset(result.data);
+      setFormData({
+        employeeId: result.data.employeeId,
+        firstName: result.data.firstName,
+        lastName: result.data.lastName,
+        email: result.data.email,
+        phone: result.data.phone,
+        department: result.data.department,
+        designation: result.data.designation,
+        joiningDate: result.data.joiningDate.slice(0, 10),
+        salary: result.data.salary,
+        status: result.data.status,
+      });
     } catch (error) {
       console.error(error);
-      alert(error.message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function onSubmit(data) {
+  function handleChange(e) {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
     try {
       const response = await fetch(`/api/employees/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       });
 
       const result = await response.json();
@@ -60,171 +84,113 @@ export default function EditEmployeePage() {
 
       router.push("/dashboard/employees");
     } catch (error) {
-      console.error(error);
       alert(error.message);
     }
   }
 
   if (loading) {
-    return (
-      <div className="rounded-xl bg-white p-8 shadow">
-        Loading...
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">
-            Edit Employee
-          </h1>
-
-          <p className="text-gray-500 mt-2">
-            Update employee information.
-          </p>
-        </div>
-
-        <Link
-          href="/dashboard/employees"
-          className="rounded-xl border px-5 py-3 hover:bg-gray-100"
-        >
-          Back
-        </Link>
-      </div>
+    <div className="rounded-xl bg-white p-8 shadow">
+      <h1 className="mb-6 text-3xl font-bold">
+        Edit Employee
+      </h1>
 
       <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="rounded-xl bg-white p-8 shadow"
+        onSubmit={handleSubmit}
+        className="grid grid-cols-2 gap-5"
       >
-        <div className="grid md:grid-cols-2 gap-6">
+        <input
+          name="employeeId"
+          value={formData.employeeId}
+          onChange={handleChange}
+          placeholder="Employee ID"
+          className="rounded border p-3"
+        />
 
-          <div>
-            <label>Employee ID</label>
+        <input
+          name="firstName"
+          value={formData.firstName}
+          onChange={handleChange}
+          placeholder="First Name"
+          className="rounded border p-3"
+        />
 
-            <input
-              {...register("employeeId")}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
-          </div>
+        <input
+          name="lastName"
+          value={formData.lastName}
+          onChange={handleChange}
+          placeholder="Last Name"
+          className="rounded border p-3"
+        />
 
-          <div>
-            <label>First Name</label>
+        <input
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="Email"
+          className="rounded border p-3"
+        />
 
-            <input
-              {...register("firstName", {
-                required: "Required",
-              })}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
+        <input
+          name="phone"
+          value={formData.phone}
+          onChange={handleChange}
+          placeholder="Phone"
+          className="rounded border p-3"
+        />
 
-            <p className="text-red-500 text-sm">
-              {errors.firstName?.message}
-            </p>
-          </div>
+        <input
+          name="department"
+          value={formData.department}
+          onChange={handleChange}
+          placeholder="Department"
+          className="rounded border p-3"
+        />
 
-          <div>
-            <label>Last Name</label>
+        <input
+          name="designation"
+          value={formData.designation}
+          onChange={handleChange}
+          placeholder="Designation"
+          className="rounded border p-3"
+        />
 
-            <input
-              {...register("lastName", {
-                required: "Required",
-              })}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
+        <input
+          type="date"
+          name="joiningDate"
+          value={formData.joiningDate}
+          onChange={handleChange}
+          className="rounded border p-3"
+        />
 
-            <p className="text-red-500 text-sm">
-              {errors.lastName?.message}
-            </p>
-          </div>
+        <input
+          type="number"
+          name="salary"
+          value={formData.salary}
+          onChange={handleChange}
+          placeholder="Salary"
+          className="rounded border p-3"
+        />
 
-          <div>
-            <label>Email</label>
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className="rounded border p-3"
+        >
+          <option>Active</option>
+          <option>Inactive</option>
+          <option>On Leave</option>
+        </select>
 
-            <input
-              type="email"
-              {...register("email")}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label>Phone</label>
-
-            <input
-              {...register("phone")}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label>Department</label>
-
-            <select
-              {...register("department")}
-              className="mt-2 w-full rounded-lg border p-3"
-            >
-              <option>Engineering</option>
-              <option>HR</option>
-              <option>Finance</option>
-              <option>Marketing</option>
-            </select>
-          </div>
-
-          <div>
-            <label>Designation</label>
-
-            <input
-              {...register("designation")}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label>Joining Date</label>
-
-            <input
-              type="date"
-              {...register("joiningDate")}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label>Salary</label>
-
-            <input
-              type="number"
-              {...register("salary")}
-              className="mt-2 w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label>Status</label>
-
-            <select
-              {...register("status")}
-              className="mt-2 w-full rounded-lg border p-3"
-            >
-              <option>Active</option>
-              <option>Inactive</option>
-              <option>On Leave</option>
-            </select>
-          </div>
-
-        </div>
-
-        <div className="mt-8 flex justify-end">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isSubmitting ? "Updating..." : "Update Employee"}
-          </button>
-        </div>
+        <button
+          className="col-span-2 rounded bg-blue-600 p-3 text-white hover:bg-blue-700"
+        >
+          Update Employee
+        </button>
       </form>
     </div>
   );
