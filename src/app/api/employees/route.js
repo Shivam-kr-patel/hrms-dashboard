@@ -2,19 +2,84 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 import Employee from "@/models/Employee";
 
-// GET /api/employees
-export async function GET() {
+// GET /api/employees?page=1&limit=10&search=shiv
+export async function GET(request) {
   try {
     await connectDB();
 
-    const employees = await Employee.find().sort({
-      createdAt: -1,
-    });
+    const { searchParams } = new URL(request.url);
+
+    const page = Number(searchParams.get("page")) || 1;
+    const limit = Number(searchParams.get("limit")) || 10;
+    const search = searchParams.get("search") || "";
+
+    const skip = (page - 1) * limit;
+
+    const query = search
+      ? {
+          $or: [
+            {
+              firstName: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+            {
+              lastName: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+            {
+              employeeId: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+            {
+              email: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+            {
+              department: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+            {
+              designation: {
+                $regex: search,
+                $options: "i",
+              },
+            },
+          ],
+        }
+      : {};
+
+    const [employees, total] = await Promise.all([
+      Employee.find(query)
+        .sort({
+          createdAt: -1,
+        })
+        .skip(skip)
+        .limit(limit),
+
+      Employee.countDocuments(query),
+    ]);
 
     return NextResponse.json({
       success: true,
-      count: employees.length,
+
       data: employees,
+
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error(error);
@@ -24,7 +89,9 @@ export async function GET() {
         success: false,
         message: "Failed to fetch employees",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
@@ -43,7 +110,9 @@ export async function POST(request) {
         success: true,
         data: employee,
       },
-      { status: 201 }
+      {
+        status: 201,
+      }
     );
   } catch (error) {
     console.error(error);
@@ -53,7 +122,9 @@ export async function POST(request) {
         success: false,
         message: error.message,
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
