@@ -57,16 +57,17 @@ export default function NewAttendancePage() {
         throw new Error(result.message);
       }
 
-      alert("Attendance marked successfully");
+      alert(result.message);
 
       router.push("/dashboard/attendance");
     } catch (error) {
+      console.error(error);
       alert(error.message);
     }
   }
 
   return (
-    <div className="rounded-xl bg-white p-8 shadow max-w-3xl">
+    <div className="max-w-3xl rounded-xl bg-white p-8 shadow">
       <h1 className="mb-6 text-3xl font-bold">
         Mark Attendance
       </h1>
@@ -79,7 +80,7 @@ export default function NewAttendancePage() {
           name="employee"
           value={formData.employee}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-lg border p-3"
           required
         >
           <option value="">
@@ -91,7 +92,8 @@ export default function NewAttendancePage() {
               key={employee._id}
               value={employee._id}
             >
-              {employee.firstName} {employee.lastName}
+              {employee.firstName} {employee.lastName} (
+              {employee.employeeId})
             </option>
           ))}
         </select>
@@ -101,7 +103,7 @@ export default function NewAttendancePage() {
           name="date"
           value={formData.date}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-lg border p-3"
           required
         />
 
@@ -110,7 +112,7 @@ export default function NewAttendancePage() {
           name="checkIn"
           value={formData.checkIn}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-lg border p-3"
           required
         />
 
@@ -119,7 +121,7 @@ export default function NewAttendancePage() {
           name="checkOut"
           value={formData.checkOut}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-lg border p-3"
           required
         />
 
@@ -127,12 +129,20 @@ export default function NewAttendancePage() {
           name="status"
           value={formData.status}
           onChange={handleChange}
-          className="w-full rounded border p-3"
+          className="w-full rounded-lg border p-3"
+          required
         >
-          <option>Present</option>
-          <option>Absent</option>
-          <option>Late</option>
-          <option>Half Day</option>
+          <option value="Present">
+            Present
+          </option>
+
+          <option value="Absent">
+            Absent
+          </option>
+
+          <option value="Leave">
+            Leave
+          </option>
         </select>
 
         <textarea
@@ -141,11 +151,12 @@ export default function NewAttendancePage() {
           value={formData.remarks}
           onChange={handleChange}
           placeholder="Remarks"
-          className="w-full rounded border p-3"
+          className="w-full rounded-lg border p-3"
         />
 
         <button
-          className="w-full rounded bg-blue-600 p-3 text-white hover:bg-blue-700"
+          type="submit"
+          className="w-full rounded-lg bg-blue-600 p-3 font-medium text-white transition hover:bg-blue-700"
         >
           Save Attendance
         </button>

@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import {
   Users,
   Building2,
@@ -7,38 +11,35 @@ import {
 
 import DashboardCard from "@/components/DashboardCard";
 
-const recentEmployees = [
-  {
-    id: 1,
-    name: "John Doe",
-    department: "Engineering",
-    role: "Frontend Developer",
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    department: "HR",
-    role: "HR Manager",
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Robert Brown",
-    department: "Finance",
-    role: "Accountant",
-    status: "On Leave",
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    department: "Marketing",
-    role: "Marketing Lead",
-    status: "Active",
-  },
-];
-
 export default function DashboardPage() {
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDashboard();
+  }, []);
+
+  async function fetchDashboard() {
+    try {
+      const response = await fetch("/api/dashboard");
+      const result = await response.json();
+
+      setDashboard(result.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="rounded-xl bg-white p-6 shadow">
+        Loading Dashboard...
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       {/* Welcome */}
@@ -52,44 +53,44 @@ export default function DashboardPage() {
         </p>
       </section>
 
-      {/* Dashboard Cards */}
+      {/* Cards */}
       <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         <DashboardCard
           title="Employees"
-          value="120"
-          growth="+8%"
+          value={dashboard.employeeCount}
+          growth=""
           icon={Users}
           color="bg-blue-600"
         />
 
         <DashboardCard
           title="Departments"
-          value="8"
-          growth="+2%"
+          value={dashboard.departmentCount}
+          growth=""
           icon={Building2}
           color="bg-violet-600"
         />
 
         <DashboardCard
-          title="Present Today"
-          value="108"
-          growth="+5%"
+          title="Attendance"
+          value={dashboard.attendanceCount}
+          growth=""
           icon={CalendarCheck}
           color="bg-green-600"
         />
 
         <DashboardCard
           title="Pending Leaves"
-          value="6"
-          growth="-1%"
+          value={dashboard.pendingLeaveCount}
+          growth=""
           icon={ClipboardList}
           color="bg-orange-500"
         />
       </section>
 
-      {/* Bottom Section */}
+      {/* Bottom */}
       <section className="grid gap-6 lg:grid-cols-2">
-        {/* Attendance */}
+        {/* Attendance Overview */}
         <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-lg font-semibold">
@@ -118,7 +119,9 @@ export default function DashboardPage() {
                 <div className="h-2 overflow-hidden rounded-full bg-gray-200">
                   <div
                     className="h-full rounded-full bg-blue-600"
-                    style={{ width: `${item.value}%` }}
+                    style={{
+                      width: `${item.value}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -132,49 +135,64 @@ export default function DashboardPage() {
             <h2 className="text-lg font-semibold">
               Recent Employees
             </h2>
-
-            <button className="text-sm font-medium text-blue-600 hover:underline">
-              View All
-            </button>
           </div>
 
           <table className="w-full">
             <thead>
               <tr className="border-b text-left text-sm text-gray-500">
-                <th className="pb-3">Employee</th>
-                <th className="pb-3">Department</th>
-                <th className="pb-3">Role</th>
-                <th className="pb-3">Status</th>
+                <th className="pb-3">
+                  Employee
+                </th>
+
+                <th className="pb-3">
+                  Department
+                </th>
+
+                <th className="pb-3">
+                  Role
+                </th>
+
+                <th className="pb-3">
+                  Status
+                </th>
               </tr>
             </thead>
 
             <tbody>
-              {recentEmployees.map((employee) => (
-                <tr
-                  key={employee.id}
-                  className="border-b last:border-0"
-                >
-                  <td className="py-4 font-medium">
-                    {employee.name}
-                  </td>
+              {dashboard.recentEmployees.map(
+                (employee) => (
+                  <tr
+                    key={employee._id}
+                    className="border-b last:border-0"
+                  >
+                    <td className="py-4 font-medium">
+                      {employee.firstName}{" "}
+                      {employee.lastName}
+                    </td>
 
-                  <td>{employee.department}</td>
+                    <td>
+                      {employee.department}
+                    </td>
 
-                  <td>{employee.role}</td>
+                    <td>
+                      {employee.designation}
+                    </td>
 
-                  <td>
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        employee.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {employee.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                    <td>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          employee.status ===
+                          "Active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {employee.status}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              )}
             </tbody>
           </table>
         </div>
