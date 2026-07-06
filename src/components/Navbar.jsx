@@ -18,7 +18,7 @@ export default function Navbar() {
       {/* Right */}
       <div className="flex items-center gap-5">
         {/* Search */}
-        <div className="relative hidden md:block">
+        {/* <div className="relative hidden md:block">
           <Search
             size={18}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -29,7 +29,7 @@ export default function Navbar() {
             placeholder="Search..."
             className="w-72 rounded-xl border border-gray-300 py-2 pl-10 pr-4 outline-none transition focus:border-blue-500"
           />
-        </div>
+        </div> */}
 
         {/* Notification */}
         <button className="relative rounded-xl p-2 transition hover:bg-gray-100">

@@ -3,53 +3,76 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/mongodb";
 
 import Employee from "@/models/Employee";
-import Department from "@/models/Department";
-import Leave from "@/models/Leave";
 import Attendance from "@/models/Attendance";
+import Leave from "@/models/Leave";
+import Payroll from "@/models/Payroll";
+import Recruitment from "@/models/Recruitment";
 
 export async function GET() {
   try {
     await connectDB();
 
-    const [
-      employeeCount,
-      departmentCount,
-      attendanceCount,
-      pendingLeaveCount,
-      recentEmployees,
-    ] = await Promise.all([
-      Employee.countDocuments(),
+    const departmentData = await Employee.aggregate([
+      {
+        $group: {
+          _id: "$department",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $sort: {
+          count: -1,
+        },
+      },
+    ]);
 
-      Department.countDocuments(),
+    const attendanceData = await Attendance.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
-      Attendance.countDocuments(),
+    const leaveData = await Leave.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
-      Leave.countDocuments({
-        status: "Pending",
-      }),
+    const payrollData = await Payroll.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
-      Employee.find()
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .select(
-          "firstName lastName department designation status"
-        ),
+    const recruitmentData = await Recruitment.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     return NextResponse.json({
       success: true,
-
       data: {
-        employeeCount,
-        departmentCount,
-        attendanceCount,
-        pendingLeaveCount,
-        recentEmployees,
+        departments: departmentData,
+        attendance: attendanceData,
+        leaves: leaveData,
+        payroll: payrollData,
+        recruitment: recruitmentData,
       },
     });
   } catch (error) {
-    console.error(error);
-
     return NextResponse.json(
       {
         success: false,
