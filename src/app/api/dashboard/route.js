@@ -12,28 +12,53 @@ export async function GET() {
   try {
     await connectDB();
 
-    const departmentData = await Employee.aggregate([
-      {
-        $group: {
-          _id: "$department",
-          count: { $sum: 1 },
-        },
-      },
-      {
-        $sort: {
-          count: -1,
-        },
-      },
-    ]);
+    // KPI Counts
+    const employeeCount = await Employee.countDocuments();
 
-    const attendanceData = await Attendance.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
+    const departmentCount = await Employee.distinct(
+      "department"
+    ).then((d) => d.length);
+
+    const attendanceCount =
+      await Attendance.countDocuments({
+        status: "Present",
+      });
+
+    const pendingLeaveCount =
+      await Leave.countDocuments({
+        status: "Pending",
+      });
+
+    // Recent Employees
+    const recentEmployees =
+      await Employee.find()
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .lean();
+
+    // Chart Data
+    const departmentData =
+      await Employee.aggregate([
+        {
+          $group: {
+            _id: "$department",
+            count: { $sum: 1 },
+          },
         },
-      },
-    ]);
+        {
+          $sort: { count: -1 },
+        },
+      ]);
+
+    const attendanceData =
+      await Attendance.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
+        },
+      ]);
 
     const leaveData = await Leave.aggregate([
       {
@@ -44,27 +69,39 @@ export async function GET() {
       },
     ]);
 
-    const payrollData = await Payroll.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
+    const payrollData =
+      await Payroll.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
         },
-      },
-    ]);
+      ]);
 
-    const recruitmentData = await Recruitment.aggregate([
-      {
-        $group: {
-          _id: "$status",
-          count: { $sum: 1 },
+    const recruitmentData =
+      await Recruitment.aggregate([
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 },
+          },
         },
-      },
-    ]);
+      ]);
 
     return NextResponse.json({
       success: true,
       data: {
+        // KPI Cards
+        employeeCount,
+        departmentCount,
+        attendanceCount,
+        pendingLeaveCount,
+
+        // Table
+        recentEmployees,
+
+        // Charts
         departments: departmentData,
         attendance: attendanceData,
         leaves: leaveData,
@@ -78,9 +115,7 @@ export async function GET() {
         success: false,
         message: error.message,
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
